@@ -1,63 +1,72 @@
 package CRUD.csc340.axolotl;
 
-import java.util.List;
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-@Transactional
 public class AxolotlService {
 
-    private final AxolotlRepository repo;
+  @Autowired
+  private AxolotlRepository axolotlRepository;
 
-    public AxolotlService(final AxolotlRepository repo) {
-        this.repo = repo;
+  public Object getAllAxolotls() {
+    return axolotlRepository.findAll();
+  }
+
+  public Axolotl getAxolotlById(@PathVariable long axolotlId) {
+    return axolotlRepository.findById(axolotlId).orElse(null);
+  }
+
+  public Object getAxolotlsByName(String name) {
+    return axolotlRepository.findByNameContainingIgnoreCase(name);
+  }
+
+  public Object getAxolotlsByCategory(String category) {
+    return axolotlRepository.findByMorphIgnoreCase(category);
+  }
+
+  public Object getAxolotlsBySex(String sex) {
+    return axolotlRepository.findBySexIgnoreCase(sex);
+  }
+
+  public Axolotl addAxolotl(Axolotl axolotl) {
+    axolotl.setId(null); // ensure DB generates the ID
+    return axolotlRepository.save(axolotl);
+  }
+
+  public Axolotl updateAxolotl(Long axolotlId, Axolotl axolotl) {
+    axolotl.setId(axolotlId);
+    return axolotlRepository.save(axolotl);
+  }
+
+  public void deleteAxolotl(Long axolotlId) {
+    axolotlRepository.deleteById(axolotlId);
+  }
+
+  public String writeJson(Axolotl axolotl) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      objectMapper.writeValue(new File("axolotls.json"), axolotl);
+      return "Axolotl written to JSON file successfully";
+    } catch (IOException e) {
+      e.printStackTrace();
+      return "Error writing axolotl to JSON file";
     }
+  }
 
-    // Reads
-    public List<Axolotl> getAll() {
-        return repo.findAll();
+  public Object readJson() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      return objectMapper.readValue(new File("axolotls.json"), Axolotl.class);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
     }
-
-    public Axolotl getById(Long id) {
-        return repo.findById(id).orElse(null);
-    }
-
-    public List<Axolotl> searchByName(String substring) {
-        return repo.findByNameContainingIgnoreCase(substring);
-    }
-
-    public List<Axolotl> getByCategory(String category) {
-        // category := morph
-        return repo.findByMorphIgnoreCase(category);
-    }
-
-    public List<Axolotl> getBySex(String sex) {
-        return repo.findBySexIgnoreCase(sex);
-    }
-
-    public Axolotl create(Axolotl a) {
-        a.setId(null); // ignore client-supplied ID
-        return repo.save(a);
-    }
-
-    public Axolotl update(Long id, Axolotl patch) {
-        Optional<Axolotl> maybe = repo.findById(id);
-        if (maybe.isEmpty()) return null;
-
-        Axolotl cur = maybe.get();
-        // Full replace for PUT (if you want PATCH behavior, add null checks)
-        cur.setName(patch.getName());
-        cur.setMorph(patch.getMorph());
-        cur.setSex(patch.getSex());
-        cur.setDescription(patch.getDescription());
-        return repo.save(cur);
-    }
-
-    public boolean delete(Long id) {
-        if (!repo.existsById(id)) return false;
-        repo.deleteById(id);
-        return true;
-    }
+  }
 }
