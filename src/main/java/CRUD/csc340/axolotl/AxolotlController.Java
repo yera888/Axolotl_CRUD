@@ -2,7 +2,7 @@ package CRUD.csc340.axolotl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity; // only used for the write/read endpoints like the demo
+import org.springframework.http.ResponseEntity; // used for parity with demo helpers
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +18,7 @@ public class AxolotlController {
   @Autowired
   private AxolotlService axolotlService;
 
+
   @GetMapping("/axolotls")
   public Object getAllAxolotls() {
     return axolotlService.getAllAxolotls();
@@ -27,6 +28,24 @@ public class AxolotlController {
   public Axolotl getAxolotlById(@PathVariable long id) {
     return axolotlService.getAxolotlById(id);
   }
+
+  @PostMapping("/axolotls")
+  public Object addAxolotl(@RequestBody Axolotl axolotl) {
+    return axolotlService.addAxolotl(axolotl);
+  }
+
+  @PutMapping("/axolotls/{id}")
+  public Axolotl updateAxolotl(@PathVariable Long id, @RequestBody Axolotl axolotl) {
+    axolotlService.updateAxolotl(id, axolotl);
+    return axolotlService.getAxolotlById(id);
+  }
+
+  @DeleteMapping("/axolotls/{id}")
+  public Object deleteAxolotl(@PathVariable Long id) {
+    axolotlService.deleteAxolotl(id);
+    return axolotlService.getAllAxolotls();
+  }
+
 
   @GetMapping("/axolotls/name")
   public Object getAxolotlsByName(@RequestParam(required = false) String key) {
@@ -42,39 +61,12 @@ public class AxolotlController {
     return axolotlService.getAxolotlsByCategory(morph);
   }
 
-
   @GetMapping("/axolotls/sex/{sex}")
   public Object getAxolotlsBySex(@PathVariable String sex) {
     return axolotlService.getAxolotlsBySex(sex);
   }
 
-  @PostMapping("/axolotls")
-  public Object addAxolotl(@RequestBody Axolotl axolotl) {
-    return axolotlService.addAxolotl(axolotl);
+  @GetMapping("/animals/search")
+  public Object searchAnimalsByName(@RequestParam(name = "name") String name) {
+    return axolotlService.getAxolotlsByName(name);
   }
-
-
-  @PutMapping("/axolotls/{id}")
-  public Axolotl updateAxolotl(@PathVariable Long id, @RequestBody Axolotl axolotl) {
-    axolotlService.updateAxolotl(id, axolotl);
-    return axolotlService.getAxolotlById(id);
-  }
-
-
-  @DeleteMapping("/axolotls/{id}")
-  public Object deleteAxolotl(@PathVariable Long id) {
-    axolotlService.deleteAxolotl(id);
-    return axolotlService.getAllAxolotls();
-  }
-
-
-  @PostMapping("/axolotls/writeFile")
-  public Object writeJson(@RequestBody Axolotl axolotl) {
-    return axolotlService.writeJson(axolotl);
-  }
-
-  @GetMapping("/axolotls/readFile")
-  public Object readJson() {
-    return axolotlService.readJson();
-  }
-}
