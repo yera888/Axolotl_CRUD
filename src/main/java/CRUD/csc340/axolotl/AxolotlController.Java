@@ -1,63 +1,80 @@
 package CRUD.csc340.axolotl;
 
-import java.util.List;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity; // only used for the write/read endpoints like the demo
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/axolotls")
 public class AxolotlController {
 
-    private final AxolotlService service;
+  @Autowired
+  private AxolotlService axolotlService;
 
-    public AxolotlController(final AxolotlService service) {
-        this.service = service;
-    }
+  @GetMapping("/axolotls")
+  public Object getAllAxolotls() {
+    return axolotlService.getAllAxolotls();
+  }
 
-    @GetMapping
-    public List<Axolotl> getAll() {
-        return service.getAll();
-    }
+  @GetMapping("/axolotls/{id}")
+  public Axolotl getAxolotlById(@PathVariable long id) {
+    return axolotlService.getAxolotlById(id);
+  }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Axolotl> getById(@PathVariable Long id) {
-        Axolotl a = service.getById(id);
-        return (a == null) ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-                           : ResponseEntity.ok(a);
+  @GetMapping("/axolotls/name")
+  public Object getAxolotlsByName(@RequestParam(required = false) String key) {
+    if (key != null && !key.isBlank()) {
+      return axolotlService.getAxolotlsByName(key);
+    } else {
+      return axolotlService.getAllAxolotls();
     }
+  }
 
-    @GetMapping("/search")
-    public List<Axolotl> searchByName(@RequestParam(name = "name") String name) {
-        return service.searchByName(name);
-    }
+  @GetMapping("/axolotls/morph/{morph}")
+  public Object getAxolotlsByMorph(@PathVariable String morph) {
+    return axolotlService.getAxolotlsByCategory(morph);
+  }
 
-    @GetMapping("/category/{category}")
-    public List<Axolotl> getByCategory(@PathVariable String category) {
-        return service.getByCategory(category);
-    }
 
-    @GetMapping("/sex/{sex}")
-    public List<Axolotl> getBySex(@PathVariable String sex) {
-        return service.getBySex(sex);
-    }
+  @GetMapping("/axolotls/sex/{sex}")
+  public Object getAxolotlsBySex(@PathVariable String sex) {
+    return axolotlService.getAxolotlsBySex(sex);
+  }
 
-    @PostMapping
-    public ResponseEntity<Axolotl> create(@RequestBody Axolotl a) {
-        Axolotl saved = service.create(a);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
+  @PostMapping("/axolotls")
+  public Object addAxolotl(@RequestBody Axolotl axolotl) {
+    return axolotlService.addAxolotl(axolotl);
+  }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Axolotl> update(@PathVariable Long id, @RequestBody Axolotl a) {
-        Axolotl updated = service.update(id, a);
-        return (updated == null) ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-                                 : ResponseEntity.ok(updated);
-    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        boolean removed = service.delete(id);
-        return removed ? ResponseEntity.noContent().build()
-                       : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
+  @PutMapping("/axolotls/{id}")
+  public Axolotl updateAxolotl(@PathVariable Long id, @RequestBody Axolotl axolotl) {
+    axolotlService.updateAxolotl(id, axolotl);
+    return axolotlService.getAxolotlById(id);
+  }
+
+
+  @DeleteMapping("/axolotls/{id}")
+  public Object deleteAxolotl(@PathVariable Long id) {
+    axolotlService.deleteAxolotl(id);
+    return axolotlService.getAllAxolotls();
+  }
+
+
+  @PostMapping("/axolotls/writeFile")
+  public Object writeJson(@RequestBody Axolotl axolotl) {
+    return axolotlService.writeJson(axolotl);
+  }
+
+  @GetMapping("/axolotls/readFile")
+  public Object readJson() {
+    return axolotlService.readJson();
+  }
 }
