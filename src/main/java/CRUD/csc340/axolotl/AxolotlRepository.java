@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AxolotlRepository extends JpaRepository<Axolotl, Long> {
 
-    List<Axolotl> findByNameContainingIgnoreCase(String name);
+  List<Axolotl> findByNameContainingIgnoreCase(String name);
 
-    List<Axolotl> findByMorphIgnoreCase(String morph);
+  List<Axolotl> findByMorphIgnoreCase(String morph);
 
-    List<Axolotl> findBySexIgnoreCase(String sex);
+  List<Axolotl> findBySexIgnoreCase(String sex);
 }
