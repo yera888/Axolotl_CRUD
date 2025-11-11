@@ -1,81 +1,63 @@
 package CRUD.csc340.axolotl;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/axolotls")
-public class AnimalController {
+public class AxolotlController {
 
-    @Autowired
-    private AxolotlService axolotlService;
+    private final AxolotlService service;
 
-    // GET /animals
+    public AxolotlController(final AxolotlService service) {
+        this.service = service;
+    }
+
     @GetMapping
-    public List<Axolotl> getAllAnimals() {
-        return axolotlService.getAllAnimals();
+    public List<Axolotl> getAll() {
+        return service.getAll();
     }
 
-    // GET /animals/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<Axolotl> getAnimalsById(@PathVariable long id) {
-        axolotl a = axolotlService.getAnimalsById(id);
-        if (a == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        return ResponseEntity.ok(a);
+    public ResponseEntity<Axolotl> getById(@PathVariable Long id) {
+        Axolotl a = service.getById(id);
+        return (a == null) ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+                           : ResponseEntity.ok(a);
     }
 
-    // GET /animals/name?key=substring
-    @GetMapping("/name")
-    public List<Animal> getAnimalsByName(@RequestParam(name = "key", required = false) String key) {
-        if (key == null || key.isBlank()) {
-            return animalService.getAllAnimals();
-        }
-        return animalService.getAnimalsByName(key);
+    @GetMapping("/search")
+    public List<Axolotl> searchByName(@RequestParam(name = "name") String name) {
+        return service.searchByName(name);
     }
 
-    // GET /animals/gender/{gender}
-    @GetMapping("/gender/{gender}")
-    public List<Animal> getAnimalsByGender(@PathVariable String gender) {
-        return animalService.getAnimalsByGender(gender);
+    @GetMapping("/category/{category}")
+    public List<Axolotl> getByCategory(@PathVariable String category) {
+        return service.getByCategory(category);
     }
 
-    // GET /animals/weight?key=12.5
-    @GetMapping("/weight")
-    public List<Animal> getAnimalsByWeight(@RequestParam(name = "key") double key) {
-        return animalService.getAnimalsByWeight(key);
+    @GetMapping("/sex/{sex}")
+    public List<Axolotl> getBySex(@PathVariable String sex) {
+        return service.getBySex(sex);
     }
 
-    // GET /animals/age?age=100  (default 100 if not provided)
-    @GetMapping("/age")
-    public ResponseEntity<List<Animal>> getAnimalsByAge(
-            @RequestParam(name = "age", defaultValue = "100") int age) {
-        return ResponseEntity.ok(animalService.getAnimalsByAge(age));
-    }
-
-    // POST /animals
     @PostMapping
-    public ResponseEntity<Animal> addAnimal(@RequestBody Animal animal) {
-        Animal saved = animalService.addAnimal(animal);
+    public ResponseEntity<Axolotl> create(@RequestBody Axolotl a) {
+        Axolotl saved = service.create(a);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // PUT /animals/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<Axolotls> updateAnimal(@PathVariable Long id, @RequestBody Animal animal) {
-        Animal updated = animalService.updateAnimal(id, animal);
-        if (updated == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<Axolotl> update(@PathVariable Long id, @RequestBody Axolotl a) {
+        Axolotl updated = service.update(id, a);
+        return (updated == null) ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+                                 : ResponseEntity.ok(updated);
     }
 
-    // DELETE /animals/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAnimal(@PathVariable Long id) {
-        boolean removed = animalService.deleteAnimal(id);
-        if (!removed) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        boolean removed = service.delete(id);
+        return removed ? ResponseEntity.noContent().build()
+                       : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
