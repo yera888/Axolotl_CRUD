@@ -1,67 +1,51 @@
 package CRUD.csc340.axolotl;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
-@Table(name = "animals")
-public class Animal {
+@Table(name = "axolotls")
+public class Axolotl {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
-    @NotNull
     private String name;
 
-    // age in years (integer, can be 0)
-    @Min(0)
-    private Integer age;
+    @NotBlank
+    @Column(nullable = false)
+    private String morph;    
 
-    // weight in kilograms (or your preferred unit)
-    @DecimalMin(value = "0.0", inclusive = true)
-    private Double weight;
+    private String sex;    
 
-    // gender/sex string
-    private String gender;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String description;
 
-    // longer text / details about the animal
-    @Column(columnDefinition = "TEXT")
-    private String summary;
+    public Axolotl() {}
 
-    // --- Constructors ---
-    public Animal() {}
-
-    public Animal(Long id, String name, Integer age, Double weight, String gender, String summary) {
+    public Axolotl(Long id, String name, String morph, String sex, String description) {
         this.id = id;
         this.name = name;
-        this.age = age;
-        this.weight = weight;
-        this.gender = gender;
-        this.summary = summary;
+        this.morph = morph;
+        this.sex = sex;
+        this.description = description;
     }
 
-    public Animal(String name, Integer age, Double weight, String gender, String summary) {
-        this(null, name, age, weight, gender, summary);
-    }
-
-    // --- Getters / Setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public Integer getAge() { return age; }
-    public void setAge(Integer age) { this.age = age; }
+    public String getMorph() { return morph; }
+    public void setMorph(String morph) { this.morph = morph; }
 
-    public Double getWeight() { return weight; }
-    public void setWeight(Double weight) { this.weight = weight; }
+    public String getSex() { return sex; }
+    public void setSex(String sex) { this.sex = sex; }
 
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
-
-    public String getSummary() { return summary; }
-    public void setSummary(String summary) { this.summary = summary; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }
