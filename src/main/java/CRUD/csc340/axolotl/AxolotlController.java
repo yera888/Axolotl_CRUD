@@ -66,7 +66,18 @@ public class AxolotlController {
     return axolotlService.getAxolotlsBySex(sex);
   }
 
-  @GetMapping("/animals/search")
+   @GetMapping("/animals/search")
   public Object searchAnimalsByName(@RequestParam(name = "name") String name) {
     return axolotlService.getAxolotlsByName(name);
   }
+
+  @PostMapping("/axolotls/writeFile")
+  public Object writeJson(@RequestBody Axolotl axolotl) {
+    return axolotlService.writeJson(axolotl);
+  }
+
+  @GetMapping("/axolotls/readFile")
+  public Object readJson() {
+    return axolotlService.readJson();
+  }
+}
