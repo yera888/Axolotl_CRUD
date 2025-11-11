@@ -1,84 +1,61 @@
 package CRUD.csc340.axolotl;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+public class AxolotlService {
 
-@Service
-public class AnimalService {
-    
-    @Autowired
-    private AnimalRepository animalRepository;
+    private final AxolotlRepository repo;
 
-    public List<Animal> getAllAnimals() {
-        return animalRepository.findAll();
+    public AxolotlService(final AxolotlRepository repo) {
+        this.repo = repo;
     }
 
-    public Animal getAnimalsById(long animalId) {
-        return animalRepository.findById(animalId).orElse(null);
+    // Reads
+    public List<Axolotl> getAll() {
+        return repo.findAll();
     }
 
-    public List<Animal> getAnimalsByName(String name) {
-        return animalRepository.findByNameContainingIgnoreCase(name);
+    public Axolotl getById(Long id) {
+        return repo.findById(id).orElse(null);
     }
 
-    public List<Animal> getAnimalsByGender(String gender) {
-        return animalRepository.findByGenderIgnoreCase(gender);
+    public List<Axolotl> searchByName(String substring) {
+        return repo.findByNameContainingIgnoreCase(substring);
     }
 
-    public List<Animal> getAnimalsByWeight(double weight){
-        return animalRepository.findByWeight(weight);
+    public List<Axolotl> getByCategory(String category) {
+        // category := morph
+        return repo.findByMorphIgnoreCase(category);
     }
 
-    public List<Animal> getAnimalsByAge(int age) {
-        return animalRepository.findByAgeGreaterThanEqual(age);
+    public List<Axolotl> getBySex(String sex) {
+        return repo.findBySexIgnoreCase(sex);
     }
 
-    public Animal addAnimal(Animal animal) {
-        // Ensure we don't accidentally persist an ID supplied by client
-        animal.setId(null);
-        return animalRepository.save(animal);
+    public Axolotl create(Axolotl a) {
+        a.setId(null); // ignore client-supplied ID
+        return repo.save(a);
     }
 
-    public Animal updateAnimal(Long animalId, Animal animal) {
-        Optional<Animal> existing = animalRepository.findById(animalId);
-        if (existing.isEmpty()) return null;
-        // set the id to ensure update rather than insert
-        animal.setId(animalId);
-        return animalRepository.save(animal);
+    public Axolotl update(Long id, Axolotl patch) {
+        Optional<Axolotl> maybe = repo.findById(id);
+        if (maybe.isEmpty()) return null;
+
+        Axolotl cur = maybe.get();
+        // Full replace for PUT (if you want PATCH behavior, add null checks)
+        cur.setName(patch.getName());
+        cur.setMorph(patch.getMorph());
+        cur.setSex(patch.getSex());
+        cur.setDescription(patch.getDescription());
+        return repo.save(cur);
     }
 
-    public boolean deleteAnimal(Long animalId) {
-        if (!animalRepository.existsById(animalId)) return false;
-        animalRepository.deleteById(animalId);
+    public boolean delete(Long id) {
+        if (!repo.existsById(id)) return false;
+        repo.deleteById(id);
         return true;
-    }
-
-    // JSON helpers (optional)
-    public String writeJson(Animal animal) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            objectMapper.writeValue(new File("animals.json"), animal);
-            return "Animal written to JSON file successfully";
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Error writing animal to JSON file";
-        }
-    }
-
-    public Animal readJson() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.readValue(new File("animals.json"), Animal.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 }
